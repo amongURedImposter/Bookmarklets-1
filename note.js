@@ -33,23 +33,41 @@ function makeDrag(elmnt) {
 function spawnNote() {
     var noteDiv = document.createElement("div")
     noteDiv.style.zIndex = "999"
+
     var note = document.createElement("textarea")
     var closeButton = document.createElement("button")
+    var downloadButton = document.createElement("a")
+
     note.rows = 20
     note.cols = 60
     note.placeholder = "Protip: You can move the note with right click or alt + left click"
+
     noteDiv.style.position = "fixed"
     noteDiv.style.top = "10%"
     noteDiv.style.left = "10%"
     noteDiv.oncontextmenu = (e) => { return false }
+
     closeButton.style.position = "absolute"
     closeButton.style.top = "100%"
     closeButton.style.left = "100%"
     closeButton.innerText = "x"
     closeButton.onclick = (e) => { noteDiv.remove() }
+
+    downloadButton.style.position = "absolute"
+    downloadButton.style.top = "100%"
+    downloadButton.style.left = "0%"
+    downloadButton.style.appearance = "button"
+    downloadButton.style.textDecoration = "none"
+    downloadButton.style.color = "initial"
+    downloadButton.onclick = (e) => { downloadButton.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(note.value) }
+    downloadButton.download = 'text.txt'
+    downloadButton.innerText = "Download"
+
     noteDiv.appendChild(note)
     noteDiv.appendChild(closeButton)
+    noteDiv.appendChild(downloadButton)
     makeDrag(noteDiv)
+
     document.body.appendChild(noteDiv)
 }
 

@@ -10,7 +10,10 @@ lines = lines.split("\n")
 bookmarklet = "javascript:"
 for line in lines:
     if line != "":
+        if line[-1] == ";":
+            line = line[:-1]
         bookmarklet += line.replace("    ", "") + ";"
+
 f.close()
 
 f = open(args.o, "w")

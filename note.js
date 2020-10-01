@@ -30,24 +30,27 @@ function makeDrag(elmnt) {
     }
 }
 
-noteDiv = document.createElement("div")
-noteDiv.style.zIndex = "999"
-note = document.createElement("textarea")
-closeButton = document.createElement("button")
-moveButton = document.createElement("button")
-note.rows = 20
-note.cols = 60
-note.placeholder = "Protip: You can move the note with right click"
-noteDiv.style.position = "fixed"
-noteDiv.style.top = "10%"
-noteDiv.style.left = "10%"
-noteDiv.oncontextmenu = (e) => { return false }
-closeButton.style.position = "absolute"
-closeButton.style.top = "100%"
-closeButton.style.left = "100%"
-closeButton.innerText = "x"
-closeButton.onclick = (e) => { document.body.removeChild(noteDiv) }
-noteDiv.appendChild(note)
-noteDiv.appendChild(closeButton)
-makeDrag(noteDiv)
-document.body.appendChild(noteDiv)
+function spawnNote() {
+    var noteDiv = document.createElement("div")
+    noteDiv.style.zIndex = "999"
+    var note = document.createElement("textarea")
+    var closeButton = document.createElement("button")
+    note.rows = 20
+    note.cols = 60
+    note.placeholder = "Protip: You can move the note with right click"
+    noteDiv.style.position = "fixed"
+    noteDiv.style.top = "10%"
+    noteDiv.style.left = "10%"
+    noteDiv.oncontextmenu = (e) => { return false }
+    closeButton.style.position = "absolute"
+    closeButton.style.top = "100%"
+    closeButton.style.left = "100%"
+    closeButton.innerText = "x"
+    closeButton.onclick = (e) => { noteDiv.remove() }
+    noteDiv.appendChild(note)
+    noteDiv.appendChild(closeButton)
+    makeDrag(noteDiv)
+    document.body.appendChild(noteDiv)
+}
+
+spawnNote()

@@ -3,7 +3,7 @@ function makeDrag(elmnt) {
     elmnt.onmousedown = dragMouseDown
 
     function dragMouseDown(e) {
-        if (e.button === 2) {
+        if (e.button === 2 || e.altKey === true) {
             e = e || window.event
             e.preventDefault()
             pos3 = e.clientX
@@ -37,7 +37,7 @@ function spawnNote() {
     var closeButton = document.createElement("button")
     note.rows = 20
     note.cols = 60
-    note.placeholder = "Protip: You can move the note with right click"
+    note.placeholder = "Protip: You can move the note with right click or alt + left click"
     noteDiv.style.position = "fixed"
     noteDiv.style.top = "10%"
     noteDiv.style.left = "10%"

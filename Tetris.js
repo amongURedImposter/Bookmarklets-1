@@ -43,9 +43,8 @@ async function spawnTetris() {
 
         commitPositions(orientation, origin) {
             var locations = []
-            for (var squarePos in orientation) {
-                console.log([origin[0] + squarePos[0], origin[1] + squarePos[1]])
-                locations.push([origin[0] + squarePos[0], origin[1] + squarePos[1]])
+            for (var i in orientation) {
+                locations.push([origin[0] + orientation[i][0], origin[1] + orientation[i][1]])
             }
             return locations
         }
@@ -53,7 +52,7 @@ async function spawnTetris() {
         constructSquares(orientation) {
             var squares = []
             for (var squarePos in orientation) {
-                squares.push(new square(this.origin[0] + squarePos[0], this.origin[1] + squarePos[1], 1))
+                squares.push(new square(this.origin[0] + orientation[squarePos][0], this.origin[1] + orientation[squarePos][1], 1))
             }
             return squares
         }
@@ -72,16 +71,17 @@ async function spawnTetris() {
             while (yVal < gridHeight) {
                 var free = 1
                 var positions = this.commitPositions(this.orientations[this.rotation], [this.origin[0], yVal])
-                // console.log(positions)
-                for (var pos in positions) {
-                    try {
-                        // console.log(grid, pos[1])
-                        if (grid[pos[1]][pos[0]] === 1) {
+                for (var i in positions) {
+                    if (grid[positions[i][1]] !== undefined) {
+                        if (grid[positions[i][1]][positions[i][0]] !== undefined) {
+                            if (grid[positions[i][1]][positions[i][0]] === 1) {
+                                free *= 0
+                                break
+                            }
+                        } else {
                             free *= 0
-                            break
                         }
-                    } catch (e) {
-                        // console.log(e)
+                    } else {
                         free *= 0
                     }
                 }
@@ -101,12 +101,16 @@ async function spawnTetris() {
             }
             return grid
         }
+
+        update() {
+            this.squares = this.constructSquares(this.orientations[this.rotation])
+        }
     }
 
     class oPiece extends piece {
         constructor(x, y) {
             super(x, y)
-            this.orientations = [[1, 0], [1, 1], [1, 0], [0, 0]]
+            this.orientations = [[[1, 0], [1, 1], [0, 1], [0, 0]]]
             this.defaultOrientation = this.orientations[0]
         }
     }
@@ -120,7 +124,11 @@ async function spawnTetris() {
     }
 
     function setSquareColor(x, y, color) {
-        document.getElementById(x.toString() + ";" + y.toString()).color = color
+        try {
+            document.getElementById(x.toString() + ";" + y.toString()).style.backgroundColor = color
+        } catch(e) {
+            console.log(e)
+        }
     }
 
     function createSquareElement(color) {
@@ -163,6 +171,9 @@ async function spawnTetris() {
                 }
             }
         }
+        for (var square in currentPiece.squares) {
+            setSquareColor(currentPiece.squares[square].x, currentPiece.squares[square].y, "#ffffff")
+        }
     }
 
     function tick() {
@@ -194,12 +205,12 @@ async function spawnTetris() {
         if (tickCount % gravitySpeed == 0 && tickCount !== 0) { //? On Gravity
             console.log("gravity!")
             resetGrid()
-            console.log(currentPiece.calculateCollisionHeight(lockedGrid))
             if (currentPiece.calculateCollisionHeight(lockedGrid) < currentPiece.origin[1]) {
                 currentPiece.origin[1] -= 1
             } else {
                 lockPiece()
             }
+            currentPiece.update()
             gridData = currentPiece.commit(gridData)
             render()
         }
@@ -224,6 +235,7 @@ async function spawnTetris() {
     var closeButton = document.createElement("button")
     var gridData = []
     var lockedGrid = []
+    var run = true
 
     var inputQueue = [] //? Input format - 0: Hard drop, 1: Soft drop, 2: Rotate, 3: Hold, 4: Left, 5: Right
 
@@ -253,7 +265,7 @@ async function spawnTetris() {
     closeButton.style.top = "100%"
     closeButton.style.left = "100%"
     closeButton.innerText = "x"
-    closeButton.onclick = (e) => { gridContainer.remove() }
+    closeButton.onclick = (e) => { gridContainer.remove(); run = false }
 
     makeDrag(gridContainer)
 
@@ -265,12 +277,10 @@ async function spawnTetris() {
     gridContainer.appendChild(closeButton)
 
     document.body.appendChild(gridContainer)
-    while (true) {
+    while (run) {
         tick()
         await new Promise(resolve => setTimeout(resolve, tickSpeed * (speed / speedAmplifier)));
     }
 }
 
-spawnTetris().then(() => {
-    alert("finished")
-})
+spawnTetris().then(() => {})

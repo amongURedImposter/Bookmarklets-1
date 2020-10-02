@@ -1,6 +1,7 @@
 function makeDrag(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
     elmnt.onmousedown = dragMouseDown
+    elmnt.oncontextmenu = (e) => { return false }
 
     function dragMouseDown(e) {
         if (e.button === 2 || e.altKey === true) {
@@ -45,7 +46,6 @@ function spawnNote() {
     noteDiv.style.position = "fixed"
     noteDiv.style.top = "10%"
     noteDiv.style.left = "10%"
-    noteDiv.oncontextmenu = (e) => { return false }
 
     closeButton.style.position = "absolute"
     closeButton.style.top = "100%"

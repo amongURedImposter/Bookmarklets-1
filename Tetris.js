@@ -1,3 +1,36 @@
+// function KeyboardController(keys, repeat, element) {
+//     var timers = {};
+
+//     element.onkeydown = function(event) {
+//         var key= (event || window.event).keyCode;
+//         if (!(key in keys))
+//             return true;
+//         if (!(key in timers)) {
+//             timers[key] = null;
+//             keys[key]();
+//             if (repeat !== 0)
+//                 timers[key] = setInterval(keys[key], repeat);
+//         }
+//         return false;
+//     };
+
+//     element.onkeyup = function(event) {
+//         var key = (event || window.event).keyCode;
+//         if (key in timers) {
+//             if (timers[key] !== null)
+//                 clearInterval(timers[key]);
+//             delete timers[key];
+//         }
+//     };
+
+//     window.onblur = function() {
+//         for (key in timers)
+//             if (timers[key] !== null)
+//                 clearInterval(timers[key]);
+//         timers = {};
+//     };
+// };
+
 function makeDrag(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
     elmnt.onmousedown = dragMouseDown
@@ -36,9 +69,9 @@ async function spawnTetris() {
         constructor(x, y) {
             this.origin = [x, y]
             this.orientations = []
-            this.defaultOrientation = []
             this.squares = this.constructSquares()
             this.rotation = 0
+            this.type = undefined
         }
 
         commitPositions(orientation, origin) {
@@ -62,10 +95,11 @@ async function spawnTetris() {
             if (this.orientations.length === this.rotation) {
                 this.rotation = 0
             }
-            this.squares = this.constructSquares(this.orientations[this.rotation])
+            this.update()
         }
 
         calculateCollisionHeight(grid) {
+            var yVals = []
             var yVal = 0
 
             while (yVal < gridHeight) {
@@ -80,24 +114,34 @@ async function spawnTetris() {
                             }
                         } else {
                             free *= 0
+                            break
                         }
                     } else {
                         free *= 0
+                        break
                     }
                 }
                 if (free === 1) {
-                    return yVal
+                    yVals.push(yVal)
                 }
                 yVal += 1
             }
-            return yVal
+            yVals.sort((a, b) => {return a - b})
+            yVals = removeConsecutives(yVals)
+            return yVals[yVals.length - 1]
         }
 
-        commit(grid) {
-            for (var square in this.squares) {
+        commit(grid, lockedGrid) {
+            this.update()
+            var collisionHeight = this.calculateCollisionHeight(lockedGrid)
+            var previewPositions = this.commitPositions(this.orientations[this.rotation], [this.origin[0], collisionHeight])
+            for (var sqr in this.squares) {
                 try {
-                    grid[square.y][square.x] = square
+                    grid[this.squares[sqr].y][this.squares[sqr].x] = this.squares[sqr]
                 } catch {}
+            }
+            for (var preview in previewPositions) {
+                grid[previewPositions[preview][1]][previewPositions[preview][0]] = new square(previewPositions[preview][0], previewPositions[preview][1], 2)
             }
             return grid
         }
@@ -110,8 +154,188 @@ async function spawnTetris() {
     class oPiece extends piece {
         constructor(x, y) {
             super(x, y)
-            this.orientations = [[[1, 0], [1, 1], [0, 1], [0, 0]]]
-            this.defaultOrientation = this.orientations[0]
+            this.orientations = [
+                [
+                    [1, 0],
+                    [1, 1],
+                    [0, 1],
+                    [0, 0]
+                ]
+            ]
+        }
+    }
+
+    class iPiece extends piece {
+        constructor(x, y) {
+            super(x, y)
+            this.type = "I"
+            this.orientations = [
+                [
+                    [0, 0],
+                    [0, -1],
+                    [0, -2],
+                    [0, 1]
+                ],
+                [
+                    [0, 0],
+                    [-2, 0],
+                    [-1, 0],
+                    [1, 0]
+                ],
+                [
+                    [-1, 0],
+                    [-1, -1],
+                    [-1, -2],
+                    [-1, 1]
+                ],
+                [
+                    [0, -1],
+                    [-2, -1],
+                    [-1, -1],
+                    [1, -1]
+                ]
+            ]
+        }
+    }
+
+    class jPiece extends piece {
+        constructor(x, y) {
+            super(x, y)
+            this.type = "J"
+            this.orientations = [
+                [
+                    [0, 0],
+                    [-1, 0],
+                    [1, 0],
+                    [-1, 1]
+                ],
+                [
+                    [0, 0],
+                    [0, 1],
+                    [1, 1],
+                    [0, -1]
+                ],
+                [
+                    [0, 0],
+                    [1, 0],
+                    [-1, 0],
+                    [1, -1]
+                ],
+                [
+                    [0, 0],
+                    [0, 1],
+                    [0, -1],
+                    [-1, -1]
+                ]
+            ]
+        }
+    }
+
+    class lPiece extends piece {
+        constructor(x, y) {
+            super(x, y)
+            this.type = "L"
+            this.orientations = [
+                [
+                    [0, 0],
+                    [1, 0],
+                    [1, 1],
+                    [-1, 0]
+                ],
+                [
+                    [0, 0],
+                    [0, 1],
+                    [0, -1],
+                    [1, -1]
+                ],
+                [
+                    [0, 0],
+                    [1, 0],
+                    [-1, 0],
+                    [-1, -1]
+                ],
+                [
+                    [0, 0],
+                    [0, 1],
+                    [0, -1],
+                    [-1, 1]
+                ]
+            ]
+        }
+    }
+
+    class tPiece extends piece {
+        constructor(x, y) {
+            super(x, y)
+            this.type = "T"
+            this.orientations = [
+                [
+                    [0, 0],
+                    [0, 1],
+                    [1, 1],
+                    [-1, 1]
+                ],
+                [
+                    [0, 0],
+                    [0, 1],
+                    [0, -1],
+                    [-1, 0]
+                ],
+                [
+                    [0, 0],
+                    [0, 1],
+                    [-1, 0],
+                    [1, 0]
+                ],
+                [
+                    [0, 0],
+                    [-1, 0],
+                    [-1, 1],
+                    [-1, -1]
+                ]
+            ]
+        }
+    }
+
+    class sPiece extends piece {
+        constructor(x, y) {
+            super(x, y)
+            this.type = "S"
+            this.orientations = [
+                [
+                    [0, 0],
+                    [0, 1],
+                    [1, 1],
+                    [-1, 0]
+                ],
+                [
+                    [0, 0],
+                    [-1, 0],
+                    [0, -1],
+                    [-1, 1]
+                ]
+            ]
+        }
+    }
+
+    class zPiece extends piece {
+        constructor(x, y) {
+            super(x, y)
+            this.type = "Z"
+            this.orientations = [
+                [
+                    [0, 0],
+                    [0, 1],
+                    [1, 0],
+                    [-1, 1]
+                ],
+                [
+                    [0, 0],
+                    [0, 1],
+                    [-1, 0],
+                    [-1, -1]
+                ]
+            ]
         }
     }
 
@@ -126,9 +350,7 @@ async function spawnTetris() {
     function setSquareColor(x, y, color) {
         try {
             document.getElementById(x.toString() + ";" + y.toString()).style.backgroundColor = color
-        } catch(e) {
-            console.log(e)
-        }
+        } catch(e) {}
     }
 
     function createSquareElement(color) {
@@ -139,12 +361,67 @@ async function spawnTetris() {
         return squareDiv
     }
 
+    function clearRow(lockedGrid, y) {
+        lockedGrid.splice(y, 1)
+        var lockedRow = []
+        for (var i = 0; i < gridWidth; i++) {
+            lockedRow.push(0)
+        }
+        lockedGrid.push(lockedRow)
+        return lockedGrid
+    }
+
     function lockPiece() {
-        for (var square in currentPiece.squares) {
-            lockedGrid[square.y][square.x] = 1
+        var affectedRows = []
+        var clearRows = []
+
+        for (var square in currentPiece.squares) { //? Find all rows affected by the piece and set the pieces' squares to 1 in the lockedGrid
+            lockedGrid[currentPiece.squares[square].y][currentPiece.squares[square].x] = 1
+            if (!affectedRows.includes(currentPiece.squares[square].y)) {
+                affectedRows.push(currentPiece.squares[square].y)
+            }
+        }
+        console.log(affectedRows)
+
+        for (var row in affectedRows) { //? Go through each affected row and check if that row is filled, add it to clearRows
+            var filled = 1
+            for (var square in lockedGrid[row]) {
+                if (lockedGrid[affectedRows[row]][square] === 0) {
+                    filled *= 0
+                    break
+                }
+            }
+            if (filled > 0) {
+                clearRows.push(parseInt(affectedRows[row]))
+            }
+        }
+        console.log(clearRows)
+
+        clearRows.sort((a, b) => {return a - b})
+        for (var row in clearRows) { //? Remove filled rows given clearRows array
+            lockedGrid = clearRow(lockedGrid, clearRows[row])
+            for (var i in clearRows) {
+                clearRows[i] -= 1
+            }
         }
 
-        currentPiece = new oPiece(gridWidth / 2, gridHeight)
+        currentPiece = randomPiece() //? Reset currentPiece to a random piece
+    }
+
+    function removeConsecutives(x) {
+        var toBePopped = []
+        for (var i in x) {
+            if (x[i - 1] + 1 === x[i]) {
+                toBePopped.push(parseInt(i))
+            }
+        }
+        for (var pop in toBePopped) {
+            x.splice(toBePopped[pop], 1)
+            for (var other in toBePopped) {
+                toBePopped[other] -= 1
+            }
+        }
+        return x
     }
 
     function resetGrid() {
@@ -176,43 +453,122 @@ async function spawnTetris() {
         }
     }
 
-    function tick() {
-        try {
-            if (inputQueue[0] === "Space") {
-                resetGrid()
-                currentPiece.origin[1] = currentPiece.calculateCollisionHeight(lockedGrid)
-                lockPiece()
-                gridData = currentPiece.commit(gridData)
-                render()
-            } else if (inputQueue[0] === "ArrowDown") {
-                speedAmplifier = 2
-            } else if (inputQueue[0] === "ArrowUp") {
-                currentPiece.rotate()
-            } else if (inputQueue[0] === "KeyC") {
-            } else if (inputQueue[0] === "ArrowLeft") {
-                if (currentPiece.origin[0] > 0) {
-                    currentPiece.origin[0] -= 1
+    function randomPiece() {
+        var pieces = [
+            new oPiece(gridWidth / 2, gridHeight),
+            new iPiece(gridWidth / 2, gridHeight),
+            new jPiece(gridWidth / 2, gridHeight),
+            new lPiece(gridWidth / 2, gridHeight),
+            new tPiece(gridWidth / 2, gridHeight),
+            new zPiece(gridWidth / 2, gridHeight),
+            new sPiece(gridWidth / 2, gridHeight)
+        ]
+        if (typeof currentPiece !== "undefined") {
+            while (true) {
+                var piece = pieces[Math.floor(Math.random() * pieces.length)]
+                if (currentPiece.type !== piece.type) {
+                    break
                 }
-            } else if (inputQueue[0] === "ArrowRight") {
-                if (currentPiece.origin[0] < gridWidth) {
-                    currentPiece.origin[0] += 1
-                }
-            } else {
-                speedAmplifier = 1
             }
-            inputQueue.pop(0)
-        } catch {}
+        } else {
+            var piece = pieces[Math.floor(Math.random() * pieces.length)]
+        }
+        return piece
+    }
+
+    function setSpeed(newSpeed) {
+        speed = newSpeed
+
+        gravitySpeed *= speed
+    }
+
+    function tick() {
         if (tickCount % gravitySpeed == 0 && tickCount !== 0) { //? On Gravity
-            console.log("gravity!")
             resetGrid()
             if (currentPiece.calculateCollisionHeight(lockedGrid) < currentPiece.origin[1]) {
                 currentPiece.origin[1] -= 1
             } else {
                 lockPiece()
             }
-            currentPiece.update()
-            gridData = currentPiece.commit(gridData)
+
+            gridData = currentPiece.commit(gridData, lockedGrid)
             render()
+        }
+        try {
+            if (inputQueue[0] === "Space") {
+                resetGrid()
+                currentPiece.origin[1] = currentPiece.calculateCollisionHeight(lockedGrid)
+                currentPiece.update()
+                lockPiece()
+                gridData = currentPiece.commit(gridData, lockedGrid)
+                render()
+            } else if (inputQueue[0] === "ArrowDown") {
+                resetGrid()
+                if (currentPiece.calculateCollisionHeight(lockedGrid) < currentPiece.origin[1]) {
+                    currentPiece.origin[1] -= 1
+                } else {
+                    lockPiece()
+                }
+                gridData = currentPiece.commit(gridData, lockedGrid)
+                render()
+            } else if (inputQueue[0] === "ArrowUp") {
+                resetGrid()
+                try {
+                    currentPiece.rotate()
+                } catch {
+
+                }
+                gridData = currentPiece.commit(gridData, lockedGrid)
+                render()
+            } else if (inputQueue[0] === "KeyC") {
+            } else if (inputQueue[0] === "ArrowLeft") {
+                resetGrid()
+
+                //? Check if the piece is moving off screen or will collide with a block (to the left)
+                var move = 1
+                var commitPositions = currentPiece.commitPositions(currentPiece.orientations[currentPiece.rotation], [currentPiece.origin[0] - 1, currentPiece.origin[1]])
+
+                for (var i in commitPositions) {
+                    try {
+                        if (commitPositions[i][0] < 0 || lockedGrid[commitPositions[i][1]][commitPositions[i][0]] === 1) {
+                            move *= 0
+                        }
+                    } catch {}
+                }
+
+                if (move > 0) {
+                    currentPiece.origin[0] -= 1
+                }
+
+                gridData = currentPiece.commit(gridData, lockedGrid)
+                render()
+            } else if (inputQueue[0] === "ArrowRight") {
+                resetGrid()
+
+                //? Check if the piece is moving off screen or will collide with a block (to the right)
+                var move = 1
+                var commitPositions = currentPiece.commitPositions(currentPiece.orientations[currentPiece.rotation], [currentPiece.origin[0] + 1, currentPiece.origin[1]])
+
+                for (var i in commitPositions) {
+                    try {
+                        if (commitPositions[i][0] === gridWidth || lockedGrid[commitPositions[i][1]][commitPositions[i][0]] === 1) {
+                            move *= 0
+                        }
+                    } catch {}
+                }
+
+                if (move > 0) {
+                    currentPiece.origin[0] += 1
+                }
+
+                gridData = currentPiece.commit(gridData, lockedGrid)
+                render()
+            } else {
+                speedAmplifier = 1
+            }
+            inputQueue.splice(0, 1)
+        } catch(e) {
+            console.log(e)
         }
         tickCount += 1
     }
@@ -225,11 +581,11 @@ async function spawnTetris() {
     var gridHeight = 24 //? Grid height
     var gridWidth = 10 //? Grid width
     var softDropTime = 75 //? Soft drop is locked after ? ticks
+    var clearTime = 75 //? Row is fully cleared after ? ticks
     var cellSize = 20 //? Square size
 
-    var currentPiece = new oPiece(gridWidth / 2, gridHeight)
+    var currentPiece = randomPiece()
     var speed = 1.0
-    var speedAmplifier = 1.0
     var gridContainer = document.createElement("div")
     var grid = document.createElement("div")
     var closeButton = document.createElement("button")
@@ -243,16 +599,12 @@ async function spawnTetris() {
     grid.style.gridTemplateColumns = "repeat(10, 1fr)"
     grid.style.gridTemplateRows = "repeat(24, 1fr)"
 
-    grid.onkeydown = (e) => {
-        inputQueue.push(e.code)
-    }
-
     for (y = 0; y < gridHeight; y++) {
         var row = []
         var lockRow = []
         for (x = 0; x < gridWidth; x++) {
             voidDiv = createSquareElement("#000000")
-            voidDiv.id = x.toString() + ";" + y.toString()
+            voidDiv.id = x.toString() + ";" + (gridHeight - (y + 1)).toString()
             grid.appendChild(voidDiv)
             lockRow.push(0)
             row.push(new square(x, y, 0))
@@ -269,6 +621,11 @@ async function spawnTetris() {
 
     makeDrag(gridContainer)
 
+    gridContainer.tabIndex = "-1"
+    gridContainer.onkeydown = (e) => {
+        inputQueue.push(e.code)
+    }
+
     gridContainer.style.position = "fixed"
     gridContainer.style.top = "30%"
     gridContainer.style.left = "40%"
@@ -277,10 +634,11 @@ async function spawnTetris() {
     gridContainer.appendChild(closeButton)
 
     document.body.appendChild(gridContainer)
+    gridContainer.focus()
     while (run) {
         tick()
-        await new Promise(resolve => setTimeout(resolve, tickSpeed * (speed / speedAmplifier)));
+        await new Promise(resolve => setTimeout(resolve, tickSpeed));
     }
 }
 
-spawnTetris().then(() => {})
+spawnTetris()

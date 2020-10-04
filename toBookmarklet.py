@@ -9,14 +9,22 @@ f = open(args.i, "r")
 lines = f.read()
 lines = lines.split("\n")
 bookmarklet = "javascript:"
-for line in lines:
-    line = line.split("//")[0].replace("    ", "")
-    if line != "":
-        if line[-1] == ";":
-            line = line[:-1]
-        bookmarklet += line
-        if line[-1] != "{":
-            bookmarklet += ";"
+for i in range(len(lines)):
+    try:
+        if lines[i][-1] == ";":
+            lines[i] = lines[i][:-1]
+        lines[i] = lines[i].split("//")[0].replace("    ", "")
+    except:
+        pass
+for line, i in zip(lines, range(len(lines))):
+    try:
+        if line != "":
+            bookmarklet += line
+            if len(lines[i + 1]) == 0 or (lines[i + 1][0] != "]" and lines[i + 1][0] != "}"):
+                if line[-1] != "{" and line[-1] != "[" and line[-1] != ",":
+                    bookmarklet += ";"
+    except IndexError:
+        pass
 
 f.close()
 

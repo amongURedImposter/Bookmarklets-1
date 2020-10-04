@@ -381,7 +381,6 @@ async function spawnTetris() {
                 affectedRows.push(currentPiece.squares[square].y)
             }
         }
-        console.log(affectedRows)
 
         for (var row in affectedRows) { //? Go through each affected row and check if that row is filled, add it to clearRows
             var filled = 1
@@ -395,7 +394,6 @@ async function spawnTetris() {
                 clearRows.push(parseInt(affectedRows[row]))
             }
         }
-        console.log(clearRows)
 
         clearRows.sort((a, b) => {return a - b})
         for (var row in clearRows) { //? Remove filled rows given clearRows array

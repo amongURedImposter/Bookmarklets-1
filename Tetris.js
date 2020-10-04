@@ -154,6 +154,7 @@ async function spawnTetris() {
     class oPiece extends piece {
         constructor(x, y) {
             super(x, y)
+            this.type = "O"
             this.orientations = [
                 [
                     [1, 0],
@@ -403,6 +404,7 @@ async function spawnTetris() {
             }
         }
 
+        holdPiece = 1
         currentPiece = randomPiece() //? Reset currentPiece to a random piece
     }
 
@@ -452,15 +454,11 @@ async function spawnTetris() {
     }
 
     function randomPiece() {
-        var pieces = [
-            new oPiece(gridWidth / 2, gridHeight),
-            new iPiece(gridWidth / 2, gridHeight),
-            new jPiece(gridWidth / 2, gridHeight),
-            new lPiece(gridWidth / 2, gridHeight),
-            new tPiece(gridWidth / 2, gridHeight),
-            new zPiece(gridWidth / 2, gridHeight),
-            new sPiece(gridWidth / 2, gridHeight)
-        ]
+        var pieces = []
+        var catalog = getPieceCatalog()
+        for (var i in catalog) {
+            pieces.push(catalog[i])
+        }
         if (typeof currentPiece !== "undefined") {
             while (true) {
                 var piece = pieces[Math.floor(Math.random() * pieces.length)]
@@ -493,14 +491,14 @@ async function spawnTetris() {
             render()
         }
         try {
-            if (inputQueue[0] === "Space") {
+            if (inputQueue[0] === hardDrop) {
                 resetGrid()
                 currentPiece.origin[1] = currentPiece.calculateCollisionHeight(lockedGrid)
                 currentPiece.update()
                 lockPiece()
                 gridData = currentPiece.commit(gridData, lockedGrid)
                 render()
-            } else if (inputQueue[0] === "ArrowDown") {
+            } else if (inputQueue[0] === softDrop) {
                 resetGrid()
                 if (currentPiece.calculateCollisionHeight(lockedGrid) < currentPiece.origin[1]) {
                     currentPiece.origin[1] -= 1
@@ -509,7 +507,7 @@ async function spawnTetris() {
                 }
                 gridData = currentPiece.commit(gridData, lockedGrid)
                 render()
-            } else if (inputQueue[0] === "ArrowUp") {
+            } else if (inputQueue[0] === rotate) {
                 resetGrid()
                 try {
                     currentPiece.rotate()
@@ -518,8 +516,25 @@ async function spawnTetris() {
                 }
                 gridData = currentPiece.commit(gridData, lockedGrid)
                 render()
-            } else if (inputQueue[0] === "KeyC") {
-            } else if (inputQueue[0] === "ArrowLeft") {
+            } else if (inputQueue[0] === hold) {
+                if (holdPiece > 0) {
+                    resetGrid()
+
+                    if (heldPiece === undefined) {
+                        var originalHeld = randomPiece()
+                    } else {
+                        var originalHeld = getPieceCatalog()[heldPiece.type]
+                    }
+                    heldPiece = getPieceCatalog()[currentPiece.type]
+                    currentPiece = originalHeld
+                    holdButton.innerText = heldPiece.type
+
+                    holdPiece *= 0
+
+                    gridData = currentPiece.commit(gridData, lockedGrid)
+                    render()
+                }
+            } else if (inputQueue[0] === left) {
                 resetGrid()
 
                 //? Check if the piece is moving off screen or will collide with a block (to the left)
@@ -540,7 +555,7 @@ async function spawnTetris() {
 
                 gridData = currentPiece.commit(gridData, lockedGrid)
                 render()
-            } else if (inputQueue[0] === "ArrowRight") {
+            } else if (inputQueue[0] === right) {
                 resetGrid()
 
                 //? Check if the piece is moving off screen or will collide with a block (to the right)
@@ -571,6 +586,19 @@ async function spawnTetris() {
         tickCount += 1
     }
 
+    function getPieceCatalog() {
+        var pieceCatalog = {
+            "O": new oPiece(gridWidth / 2, gridHeight),
+            "I": new iPiece(gridWidth / 2, gridHeight),
+            "J": new jPiece(gridWidth / 2, gridHeight),
+            "L": new lPiece(gridWidth / 2, gridHeight),
+            "T": new tPiece(gridWidth / 2, gridHeight),
+            "Z": new zPiece(gridWidth / 2, gridHeight),
+            "S": new sPiece(gridWidth / 2, gridHeight)
+        }
+        return pieceCatalog
+    }
+
     //? Settings
 
     var tickCount = 0 //? Number of ticks processed
@@ -582,14 +610,26 @@ async function spawnTetris() {
     var clearTime = 75 //? Row is fully cleared after ? ticks
     var cellSize = 20 //? Square size
 
+    //? Controls
+    var left = "ArrowLeft"
+    var right = "ArrowRight"
+    var rotate = "ArrowUp"
+    var softDrop = "ArrowDown"
+    var hardDrop = "Space"
+    var hold = "KeyC"
+
+    //? Initialize variables
     var currentPiece = randomPiece()
+    var heldPiece = undefined
     var speed = 1.0
     var gridContainer = document.createElement("div")
     var grid = document.createElement("div")
     var closeButton = document.createElement("button")
+    var holdButton = document.createElement("button")
     var gridData = []
     var lockedGrid = []
     var run = true
+    var holdPiece = 1
 
     var inputQueue = [] //? Input format - 0: Hard drop, 1: Soft drop, 2: Rotate, 3: Hold, 4: Left, 5: Right
 
@@ -617,12 +657,17 @@ async function spawnTetris() {
     closeButton.innerText = "x"
     closeButton.onclick = (e) => { gridContainer.remove(); run = false }
 
+    holdButton.style.position = "absolute"
+    holdButton.style.padding = "7.5px"
+    holdButton.style.top = "0%"
+    holdButton.style.left = "-15%"
+    holdButton.innerText = "-"
+    holdButton.onclick = (e) => { inputQueue.push(hold); gridContainer.focus() }
+
     makeDrag(gridContainer)
 
     gridContainer.tabIndex = "-1"
-    gridContainer.onkeydown = (e) => {
-        inputQueue.push(e.code)
-    }
+    gridContainer.onkeydown = (e) => { inputQueue.push(e.code) }
 
     gridContainer.style.position = "fixed"
     gridContainer.style.top = "30%"
@@ -630,6 +675,7 @@ async function spawnTetris() {
 
     gridContainer.appendChild(grid)
     gridContainer.appendChild(closeButton)
+    gridContainer.appendChild(holdButton)
 
     document.body.appendChild(gridContainer)
     gridContainer.focus()

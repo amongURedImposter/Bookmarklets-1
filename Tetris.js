@@ -69,9 +69,9 @@ async function spawnTetris() {
         constructor(x, y) {
             this.origin = [x, y]
             this.orientations = []
-            this.squares = this.constructSquares()
             this.rotation = 0
             this.type = undefined
+            this.squares = this.constructSquares(this.orientations[this.rotation], this.origin)
         }
 
         commitPositions(orientation, origin) {
@@ -82,7 +82,7 @@ async function spawnTetris() {
             return locations
         }
 
-        constructSquares(orientation) {
+        constructSquares(orientation, origin) {
             var squares = []
             for (var squarePos in orientation) {
                 squares.push(new square(this.origin[0] + orientation[squarePos][0], this.origin[1] + orientation[squarePos][1], 1))
@@ -94,6 +94,22 @@ async function spawnTetris() {
             this.rotation += 1
             if (this.orientations.length === this.rotation) {
                 this.rotation = 0
+            }
+            var positions = this.commitPositions(this.orientations[this.rotation], this.origin)
+            var offset = 0
+            for (var i in positions) {
+                if (positions[i][0] < 0 && positions[i][0] * -1 > offset) {
+                    offset = positions[i][0] * -1
+                } else if (positions[i][0] >= gridWidth && positions[i][0] * -1 < offset) {
+                    offset = (positions[i][0] - (gridWidth - 1)) * -1
+                }
+            }
+            try {
+                this.constructSquares(this.orientations[this.rotation], [this.origin[0] + offset, this.origin[1]])
+                this.origin[0] += offset
+            } catch {
+                this.rotation -= 1
+                return
             }
             this.update()
         }
@@ -147,7 +163,7 @@ async function spawnTetris() {
         }
 
         update() {
-            this.squares = this.constructSquares(this.orientations[this.rotation])
+            this.squares = this.constructSquares(this.orientations[this.rotation], this.origin)
         }
     }
 
@@ -404,6 +420,9 @@ async function spawnTetris() {
             }
         }
 
+        blink = 1
+        blinking = false
+
         holdPiece = 1
         currentPiece = randomPiece() //? Reset currentPiece to a random piece
     }
@@ -449,7 +468,11 @@ async function spawnTetris() {
             }
         }
         for (var square in currentPiece.squares) {
-            setSquareColor(currentPiece.squares[square].x, currentPiece.squares[square].y, "#ffffff")
+            if (blinking === true && blink < 0) {
+                setSquareColor(currentPiece.squares[square].x, currentPiece.squares[square].y, "#ababab")
+            } else {
+                setSquareColor(currentPiece.squares[square].x, currentPiece.squares[square].y, "#ffffff")
+            }
         }
     }
 
@@ -479,12 +502,30 @@ async function spawnTetris() {
     }
 
     function tick() {
+        if (locking > softDropTime) { //? Before lock piece
+            locking = 0
+            resetGrid()
+            lockPiece()
+            gridData = currentPiece.commit(gridData, lockedGrid)
+            render()
+        } else if (locking > 0)  {
+            locking += 1
+        }
+        if (blinking === true && tickCount % blinkTime == 0) {
+            resetGrid()
+            blink *= -1
+            render()
+        }
         if (tickCount % gravitySpeed == 0 && tickCount !== 0) { //? On Gravity
             resetGrid()
             if (currentPiece.calculateCollisionHeight(lockedGrid) < currentPiece.origin[1]) {
                 currentPiece.origin[1] -= 1
             } else {
-                lockPiece()
+                if (locking === 0) {
+                    locking = 1
+                    // blinking = true
+                    // blink *= -1
+                }
             }
 
             gridData = currentPiece.commit(gridData, lockedGrid)
@@ -508,17 +549,21 @@ async function spawnTetris() {
                 gridData = currentPiece.commit(gridData, lockedGrid)
                 render()
             } else if (inputQueue[0] === rotate) {
+                if (locking > 0) {
+                    locking += 25
+                }
                 resetGrid()
                 try {
                     currentPiece.rotate()
-                } catch {
-
-                }
+                } catch {}
                 gridData = currentPiece.commit(gridData, lockedGrid)
                 render()
             } else if (inputQueue[0] === hold) {
                 if (holdPiece > 0) {
                     resetGrid()
+
+                    blink = 1
+                    blinking = false
 
                     if (heldPiece === undefined) {
                         var originalHeld = randomPiece()
@@ -536,6 +581,10 @@ async function spawnTetris() {
                 }
             } else if (inputQueue[0] === left) {
                 resetGrid()
+
+                if (locking > 0) {
+                    locking += 25
+                }
 
                 //? Check if the piece is moving off screen or will collide with a block (to the left)
                 var move = 1
@@ -557,6 +606,10 @@ async function spawnTetris() {
                 render()
             } else if (inputQueue[0] === right) {
                 resetGrid()
+
+                if (locking > 0) {
+                    locking += 25
+                }
 
                 //? Check if the piece is moving off screen or will collide with a block (to the right)
                 var move = 1
@@ -606,8 +659,8 @@ async function spawnTetris() {
     var gravitySpeed = 75 //? Gravity is applied every ? ticks
     var gridHeight = 24 //? Grid height
     var gridWidth = 10 //? Grid width
-    var softDropTime = 75 //? Soft drop is locked after ? ticks
-    var clearTime = 75 //? Row is fully cleared after ? ticks
+    var softDropTime = 50 //? Soft drop is locked after ? ticks
+    var blinkTime = 25 //? Will change soft drop blink state after ? ticks
     var cellSize = 20 //? Square size
 
     //? Controls
@@ -630,6 +683,9 @@ async function spawnTetris() {
     var lockedGrid = []
     var run = true
     var holdPiece = 1
+    var locking = 0
+    var blinking = false
+    var blink = -1
 
     var inputQueue = [] //? Input format - 0: Hard drop, 1: Soft drop, 2: Rotate, 3: Hold, 4: Left, 5: Right
 

@@ -1,36 +1,3 @@
-// function KeyboardController(keys, repeat, element) {
-//     var timers = {}
-
-//     element.onkeydown = function(event) {
-//         var key= (event || window.event).keyCode
-//         if (!(key in keys))
-//             return true
-//         if (!(key in timers)) {
-//             timers[key] = null
-//             keys[key]()
-//             if (repeat !== 0)
-//                 timers[key] = setInterval(keys[key], repeat)
-//         }
-//         return false
-//     }
-
-//     element.onkeyup = function(event) {
-//         var key = (event || window.event).keyCode
-//         if (key in timers) {
-//             if (timers[key] !== null)
-//                 clearInterval(timers[key])
-//             delete timers[key]
-//         }
-//     }
-
-//     element.onblur = function() {
-//         for (key in timers)
-//             if (timers[key] !== null)
-//                 clearInterval(timers[key])
-//         timers = {}
-//     }
-// }
-
 function makeDrag(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
     elmnt.onmousedown = dragMouseDown
@@ -368,7 +335,7 @@ async function spawnTetris() {
     }
 
     class square {
-        constructor(x, y, type) {
+        constructor(x, y, type, color) {
             this.x = x
             this.y = y
             this.type = type //? Type Format - 0:Empty, 1:Occupied, 2:Preview
@@ -549,6 +516,7 @@ async function spawnTetris() {
             lockPiece()
             gridData = currentPiece.commit(gridData, lockedGrid)
             render()
+            return
         } else if (locking > 0) { //? During locking piece process
             locking += 1
         }

@@ -431,6 +431,26 @@ async function spawnTetris() {
             }
         }
 
+        switch (clearRows.length) {
+            case 0:
+                break
+            case 1:
+                updateScore(score + singleScore)
+                break
+            case 2:
+                updateScore(score + doubleScore)
+                break
+            case 3:
+                updateScore(score + tripleScore)
+                break
+            case 4:
+                updateScore(score + quadScore)
+                break
+            default:
+                updateScore(score + quadScore)
+                break
+        }
+
         blink = 1
         blinking = false
 
@@ -506,10 +526,16 @@ async function spawnTetris() {
         return piece
     }
 
-    function setSpeed(newSpeed) {
-        speed = newSpeed
+    function increaseSpeed(increment) {
+        gravitySpeed -= increment
+        if (gravitySpeed < 1) {
+            gravitySpeed = 1
+        }
+    }
 
-        gravitySpeed *= speed
+    function updateScore(newscore) {
+        score = newscore
+        scoreButton.innerText = score.toString()
     }
 
     function tick() {
@@ -558,8 +584,6 @@ async function spawnTetris() {
                 resetGrid()
                 if (currentPiece.calculateCollisionHeight(lockedGrid) < currentPiece.origin[1]) {
                     currentPiece.origin[1] -= 1
-                } else {
-                    lockPiece()
                 }
                 gridData = currentPiece.commit(gridData, lockedGrid)
                 render()
@@ -651,6 +675,9 @@ async function spawnTetris() {
         } catch(e) {
             console.log(e)
         }
+        if (tickCount % speedTime == 0 && tickCount !== 0) { //? On speedup
+            increaseSpeed(5)
+        }
         tickCount += 1
     }
 
@@ -677,6 +704,11 @@ async function spawnTetris() {
     var softDropTime = 50 //? Soft drop is locked after ? ticks
     var blinkTime = 25 //? Will change soft drop blink state after ? ticks
     var cellSize = 20 //? Square size
+    var speedTime = 1000 //? Will speed up after ? ticks
+    var singleScore = 100 //? One line cleared at once
+    var doubleScore = 200 //? Two lines cleared at once
+    var tripleScore = 400 //? Three lines cleared at once
+    var quadScore = 800 //? Four lines cleared at once
 
     //? Controls
     var left = "ArrowLeft"
@@ -689,11 +721,11 @@ async function spawnTetris() {
     //? Initialize variables
     var currentPiece = randomPiece()
     var heldPiece = undefined
-    var speed = 1.0
     var gridContainer = document.createElement("div")
     var grid = document.createElement("div")
     var closeButton = document.createElement("button")
     var holdButton = document.createElement("button")
+    var scoreButton = document.createElement("button")
     var gridData = []
     var lockedGrid = []
     var run = true
@@ -701,6 +733,7 @@ async function spawnTetris() {
     var locking = 0
     var blinking = false
     var blink = -1
+    var score = 0
 
     var inputQueue = [] //? Input format - 0: Hard drop, 1: Soft drop, 2: Rotate, 3: Hold, 4: Left, 5: Right
 
@@ -735,6 +768,12 @@ async function spawnTetris() {
     holdButton.innerText = "-"
     holdButton.onclick = (e) => { inputQueue.push(hold); gridContainer.focus() }
 
+    scoreButton.style.position = "absolute"
+    scoreButton.style.padding = "3px"
+    scoreButton.style.top = "0%"
+    scoreButton.style.left = "105%"
+    scoreButton.innerText = "0"
+
     makeDrag(gridContainer)
 
     gridContainer.tabIndex = "-1"
@@ -749,6 +788,7 @@ async function spawnTetris() {
     gridContainer.appendChild(grid)
     gridContainer.appendChild(closeButton)
     gridContainer.appendChild(holdButton)
+    gridContainer.appendChild(scoreButton)
 
     document.body.appendChild(gridContainer)
     gridContainer.focus()

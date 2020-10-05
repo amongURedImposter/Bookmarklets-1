@@ -85,28 +85,39 @@ async function spawnTetris() {
         constructSquares(orientation, origin) {
             var squares = []
             for (var squarePos in orientation) {
-                squares.push(new square(this.origin[0] + orientation[squarePos][0], this.origin[1] + orientation[squarePos][1], 1))
+                squares.push(new square(origin[0] + orientation[squarePos][0], origin[1] + orientation[squarePos][1], 1))
             }
             return squares
         }
 
-        rotate() {
+        rotate(lockedGrid) {
             this.rotation += 1
             if (this.orientations.length === this.rotation) {
                 this.rotation = 0
             }
             var positions = this.commitPositions(this.orientations[this.rotation], this.origin)
-            var offset = 0
+            var offsetX = 0
+            var offsetY = 0
             for (var i in positions) {
-                if (positions[i][0] < 0 && positions[i][0] * -1 > offset) {
-                    offset = positions[i][0] * -1
-                } else if (positions[i][0] >= gridWidth && positions[i][0] * -1 < offset) {
-                    offset = (positions[i][0] - (gridWidth - 1)) * -1
+                try {
+                    if (lockedGrid[positions[i][1]][positions[i][0]] === 1) {
+                        offsetY += 1
+                    }
+                } catch {
+                    if (!(positions[i][1] >= gridHeight)) {
+                        offsetY += 1
+                    }
+                }
+                if (positions[i][0] < 0 && positions[i][0] * -1 > offsetX) {
+                    offsetX = positions[i][0] * -1
+                } else if (positions[i][0] >= gridWidth && positions[i][0] * -1 < offsetX) {
+                    offsetX = (positions[i][0] - (gridWidth - 1)) * -1
                 }
             }
             try {
-                this.constructSquares(this.orientations[this.rotation], [this.origin[0] + offset, this.origin[1]])
-                this.origin[0] += offset
+                this.constructSquares(this.orientations[this.rotation], [this.origin[0] + offsetX, this.origin[1] + offsetY])
+                this.origin[0] += offsetX
+                this.origin[1] += offsetY
             } catch {
                 this.rotation -= 1
                 return
@@ -502,13 +513,17 @@ async function spawnTetris() {
     }
 
     function tick() {
-        if (locking > softDropTime) { //? Before lock piece
+        if (locking > softDropTime) { //? On lock piece
+            if (currentPiece.calculateCollisionHeight(lockedGrid) < currentPiece.origin[1]) {
+                currentPiece.origin[1] -= 1
+            }
+            currentPiece.update()
             locking = 0
             resetGrid()
             lockPiece()
             gridData = currentPiece.commit(gridData, lockedGrid)
             render()
-        } else if (locking > 0)  {
+        } else if (locking > 0) { //? During locking piece process
             locking += 1
         }
         if (blinking === true && tickCount % blinkTime == 0) {
@@ -554,7 +569,7 @@ async function spawnTetris() {
                 }
                 resetGrid()
                 try {
-                    currentPiece.rotate()
+                    currentPiece.rotate(lockedGrid)
                 } catch {}
                 gridData = currentPiece.commit(gridData, lockedGrid)
                 render()

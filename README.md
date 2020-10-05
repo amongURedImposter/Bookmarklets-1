@@ -2,7 +2,7 @@
 
 ## Installing
 
-Copy the code into the url of a new bookmark and you can run the bookmarklet by clicking it on a page!
+Copy the code into the url text box of a new bookmark and you can run the bookmarklet by clicking it on a page!
 
 **Tip: Select all only takes 3 clicks**
 

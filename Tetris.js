@@ -1,35 +1,35 @@
 // function KeyboardController(keys, repeat, element) {
-//     var timers = {};
+//     var timers = {}
 
 //     element.onkeydown = function(event) {
-//         var key= (event || window.event).keyCode;
+//         var key= (event || window.event).keyCode
 //         if (!(key in keys))
-//             return true;
+//             return true
 //         if (!(key in timers)) {
-//             timers[key] = null;
-//             keys[key]();
+//             timers[key] = null
+//             keys[key]()
 //             if (repeat !== 0)
-//                 timers[key] = setInterval(keys[key], repeat);
+//                 timers[key] = setInterval(keys[key], repeat)
 //         }
-//         return false;
-//     };
+//         return false
+//     }
 
 //     element.onkeyup = function(event) {
-//         var key = (event || window.event).keyCode;
+//         var key = (event || window.event).keyCode
 //         if (key in timers) {
 //             if (timers[key] !== null)
-//                 clearInterval(timers[key]);
-//             delete timers[key];
+//                 clearInterval(timers[key])
+//             delete timers[key]
 //         }
-//     };
+//     }
 
-//     window.onblur = function() {
+//     element.onblur = function() {
 //         for (key in timers)
 //             if (timers[key] !== null)
-//                 clearInterval(timers[key]);
-//         timers = {};
-//     };
-// };
+//                 clearInterval(timers[key])
+//         timers = {}
+//     }
+// }
 
 function makeDrag(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
@@ -299,27 +299,27 @@ async function spawnTetris() {
             this.orientations = [
                 [
                     [0, 0],
-                    [0, 1],
-                    [1, 1],
-                    [-1, 1]
-                ],
-                [
-                    [0, 0],
-                    [0, 1],
                     [0, -1],
+                    [1, 0],
                     [-1, 0]
                 ],
                 [
                     [0, 0],
                     [0, 1],
                     [-1, 0],
-                    [1, 0]
+                    [0, -1]
                 ],
                 [
                     [0, 0],
-                    [-1, 0],
-                    [-1, 1],
-                    [-1, -1]
+                    [0, -1],
+                    [-1, -1],
+                    [1, -1]
+                ],
+                [
+                    [0, 0],
+                    [0, 1],
+                    [0, -1],
+                    [1, 0]
                 ]
             ]
         }
@@ -493,7 +493,7 @@ async function spawnTetris() {
         for (var i in catalog) {
             pieces.push(catalog[i])
         }
-        if (typeof currentPiece !== "undefined") {
+        if (currentPiece !== undefined) {
             while (true) {
                 var piece = pieces[Math.floor(Math.random() * pieces.length)]
                 if (currentPiece.type !== piece.type) {
@@ -738,7 +738,9 @@ async function spawnTetris() {
     makeDrag(gridContainer)
 
     gridContainer.tabIndex = "-1"
-    gridContainer.onkeydown = (e) => { inputQueue.push(e.code) }
+    gridContainer.onkeydown = (e) => {
+        inputQueue.push(e.code)
+    }
 
     gridContainer.style.position = "fixed"
     gridContainer.style.top = "30%"

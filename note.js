@@ -38,7 +38,9 @@ function spawnNote() {
     var note = document.createElement("textarea")
     var closeButton = document.createElement("button")
     var downloadButton = document.createElement("a")
+    var openButton = document.createElement("input")
 
+    note.id = "NotepadTextArea"
     note.rows = 20
     note.cols = 60
     note.placeholder = "Protip: You can move the note with right click or alt + left click"
@@ -53,6 +55,12 @@ function spawnNote() {
     closeButton.innerText = "x"
     closeButton.onclick = (e) => { noteDiv.remove() }
 
+    openButton.type = "file"
+    openButton.style.position = "absolute"
+    openButton.style.top = "0%"
+    openButton.style.left = "101%"
+    openButton.onchange = (e) => {e.target.files[0].text().then((t) => note.value = t)}
+
     downloadButton.style.position = "absolute"
     downloadButton.style.top = "100%"
     downloadButton.style.left = "0%"
@@ -66,6 +74,7 @@ function spawnNote() {
     noteDiv.appendChild(note)
     noteDiv.appendChild(closeButton)
     noteDiv.appendChild(downloadButton)
+    noteDiv.appendChild(openButton)
     makeDrag(noteDiv)
 
     document.body.appendChild(noteDiv)

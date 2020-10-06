@@ -1,3 +1,24 @@
+function getcookie(name = '') {
+    let cookies = document.cookie
+    let cookiestore = {}
+
+    cookies = cookies.split(";")
+
+    if (cookies[0] == "" && cookies[0][0] == undefined) {
+        return undefined
+    }
+
+    cookies.forEach(function(cookie) {
+        cookie = cookie.split(/=(.+)/);
+        if (cookie[0].substr(0, 1) == ' ') {
+            cookie[0] = cookie[0].substr(1)
+        }
+        cookiestore[cookie[0]] = cookie[1]
+    })
+
+    return (name !== '' ? cookiestore[name] : cookiestore)
+}
+
 function makeDrag(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
     elmnt.onmousedown = dragMouseDown
@@ -44,6 +65,11 @@ function spawnNote() {
     note.rows = 20
     note.cols = 60
     note.placeholder = "Protip: You can move the note with right click or alt + left click"
+    if (getcookie('NotepadTextValue') === undefined ) {
+        note.value = ""
+    } else {
+        note.value = getcookie('NotepadTextValue')
+    }
 
     noteDiv.style.position = "fixed"
     noteDiv.style.top = "10%"
@@ -53,7 +79,11 @@ function spawnNote() {
     closeButton.style.top = "100%"
     closeButton.style.left = "100%"
     closeButton.innerText = "x"
-    closeButton.onclick = (e) => { noteDiv.remove() }
+    closeButton.onclick = (e) => {
+        noteDiv.remove()
+        var d = new Date()
+        document.cookie = "NotepadTextValue=" + note.value // + ";expires=" + d.setDate(d.getDate() + 3)
+    }
 
     openButton.type = "file"
     openButton.style.position = "absolute"

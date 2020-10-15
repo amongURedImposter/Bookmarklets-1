@@ -400,6 +400,7 @@ async function spawnTetris() {
 
         switch (clearRows.length) {
             case 0:
+                updateScore(score + hardDropScore)
                 break
             case 1:
                 updateScore(score + singleScore)
@@ -416,6 +417,12 @@ async function spawnTetris() {
             default:
                 updateScore(score + quadScore)
                 break
+        }
+
+        placedPieces += 1
+
+        if (placedPieces % speedTime == 0 && placedPieces !== 0) { //? On speedup
+            increaseSpeed(5)
         }
 
         blink = 1
@@ -553,6 +560,7 @@ async function spawnTetris() {
                 if (currentPiece.calculateCollisionHeight(lockedGrid) < currentPiece.origin[1]) {
                     currentPiece.origin[1] -= 1
                 }
+                updateScore(score + softDropScore)
                 gridData = currentPiece.commit(gridData, lockedGrid)
                 render()
             } else if (inputQueue[0] === rotate) {
@@ -643,9 +651,6 @@ async function spawnTetris() {
         } catch(e) {
             console.log(e)
         }
-        if (tickCount % speedTime == 0 && tickCount !== 0) { //? On speedup
-            increaseSpeed(5)
-        }
         tickCount += 1
     }
 
@@ -672,10 +677,12 @@ async function spawnTetris() {
     var softDropTime = 50 //? Soft drop is locked after ? ticks
     var blinkTime = 25 //? Will change soft drop blink state after ? ticks
     var cellSize = 20 //? Square size
-    var speedTime = 1000 //? Will speed up after ? ticks
+    var speedTime = 20 //? Will speed up after ? pieces placed
+    var softDropScore = 1 //? Soft drop one cell added score
+    var hardDropScore = 50 //? Hard drop added score
     var singleScore = 100 //? One line cleared at once
-    var doubleScore = 200 //? Two lines cleared at once
-    var tripleScore = 400 //? Three lines cleared at once
+    var doubleScore = 300 //? Two lines cleared at once
+    var tripleScore = 500 //? Three lines cleared at once
     var quadScore = 800 //? Four lines cleared at once
 
     //? Controls
@@ -702,6 +709,7 @@ async function spawnTetris() {
     var blinking = false
     var blink = -1
     var score = 0
+    var placedPieces = 0
 
     var inputQueue = [] //? Input format - 0: Hard drop, 1: Soft drop, 2: Rotate, 3: Hold, 4: Left, 5: Right
 

@@ -1,0 +1,25 @@
+{
+  "name": "bookmarklets",
+  "version": "1.0.0",
+  "description": "Short programs you can run on any page!",
+  "main": "toBookmarklet.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/LQR471814/Bookmarklets.git"
+  },
+  "keywords": [
+    "bookmarklet"
+  ],
+  "author": "LQR471814",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LQR471814/Bookmarklets/issues"
+  },
+  "homepage": "https://github.com/LQR471814/Bookmarklets#readme",
+  "dependencies": {
+    "babel-minify": "^0.5.1"
+  }
+}

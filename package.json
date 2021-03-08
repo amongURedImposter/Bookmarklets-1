@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/LQR471814/Bookmarklets#readme",
   "dependencies": {
-    "babel-minify": "^0.5.1"
+    "babel-minify": "^0.5.1",
+    "clipboardy": "^2.3.0"
   }
 }

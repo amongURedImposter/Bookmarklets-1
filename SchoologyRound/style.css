@@ -1,0 +1,79 @@
+:root {
+    --round-radius: 7.5px;
+}
+
+a, button, div, article, input, img, span.fc-button-today, textarea {
+    border-radius: var(--round-radius);
+}
+
+.mod-style-stickyNav {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    padding: 10px;
+}
+
+.mod-style-navMenuButton {
+    backdrop-filter: blur(2px);
+    background-color: transparent !important;
+    border: 1px solid #cfcfcf;
+
+    box-sizing: border-box;
+    box-shadow: 0 1px 5px 0 rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%);
+
+    transition: border ease-in-out 0.1s;
+}
+
+.mod-style-navMenuButton:hover {
+    border: 3px solid #f0f0f0;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 1px 5px 0 rgb(0 0 0 / 30%), 0 2px 2px 0 rgb(0 0 0 / 24%), 0 3px 1px -2px rgb(0 0 0 / 22%);
+}
+
+.action-links {
+    border-radius: var(--round-radius);
+}
+
+.ui-selectmenu-menu { /* boy oh boy, someone got creative with the names */
+    border-radius: var(--round-radius);
+    margin-top: 40px !important;
+}
+
+.ui-selectmenu-menu li a {
+    transition: all 0.1s ease-in-out;
+}
+
+/* Sharp on the right side */
+a[role="menuitem"], span.fc-corner-left:not(span.fc-button-today) {
+    border-radius: var(--round-radius) 0px 0px var(--round-radius);
+}
+
+/* Sharp on the left side */
+span.fc-corner-right:not(span.fc-button-today) {
+    border-radius: 0px var(--round-radius) var(--round-radius) 0px;
+}
+
+/* Sharp on the top side */
+.popups-tab {
+    border-radius: var(--round-radius) var(--round-radius) 0px 0px;
+}
+
+/* Sharp on the bottom side */
+.popups-title {
+    border-radius: 0px 0px var(--round-radius) var(--round-radius);
+}
+
+/* #attachments-added-container {
+    padding-top: 10px;
+} */
+
+#main-content-wrapper {
+    border-top: 1px solid #c7c7c7 !important;
+    border-left: 1px solid #c7c7c7 !important;
+    border-bottom: 1px solid #c7c7c7 !important;
+    border-right: 1px solid #c7c7c7 !important;
+}
+
+#course-profile-materials-folders a.sExtlink-processed {
+    padding: 15px 0px;
+}

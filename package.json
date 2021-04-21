@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Short programs you can run on any page!",
   "main": "toBookmarklet.js",
-  "scripts": {
-    "test": "test"
-  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/LQR471814/Bookmarklets.git"
@@ -20,7 +17,10 @@
   },
   "homepage": "https://github.com/LQR471814/Bookmarklets#readme",
   "dependencies": {
+    "await-exec": "^0.1.2",
     "babel-minify": "^0.5.1",
-    "clipboardy": "^2.3.0"
+    "clipboardy": "^2.3.0",
+    "css": "^3.0.0",
+    "typescript": "^4.2.3"
   }
 }

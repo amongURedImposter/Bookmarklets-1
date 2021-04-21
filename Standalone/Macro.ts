@@ -1,29 +1,43 @@
-// * Shamelessly copied from Stack Overflow like a true JS Developer ;)
-function findDeepest(elem) {
-    var result = {
-        maxDepth: 0,
-        deepestElem: null
-    }
-    descend(elem, 0, result);
-    return result
+interface KeyCombo {
+    key: string
+    shiftKey: boolean
+    ctrlKey: boolean
+    altKey: boolean
+    metaKey: boolean
 }
 
-function descend(elem, depth, result) {
-    switch (elem.nodeType) {
-        case 1: // ELEMENT_NODE
-            result.maxDepth = depth;
-            result.deepestElem = elem;
-            if (elem.childNodes.length) {
-                descend(elem.childNodes[0], depth + 1, result);
-            }
-            break;
-        case 3: // TEXT_NODE
-        case 4: // CDATA_SECTION_NODE
-        case 5: // ENTITY_REFERENCE_NODE
-        case 8: // COMMENT_NODE
-            // handle these cases as needed
-            break;
+interface Position {
+    x: number
+    y: number
+}
+
+// * Shamelessly copied from Stack Overflow like a true JS Developer ;)
+function findDeepest(elem: Element) {
+    var result = {
+        maxDepth: 0,
+        deepestElem: elem
     }
+
+    const descend = (elem: Element, depth: number, result: { maxDepth: number, deepestElem: Element }) => {
+        switch (elem.nodeType) {
+            case 1: // ELEMENT_NODE
+                result.maxDepth = depth;
+                result.deepestElem = elem;
+                if (elem.childNodes.length) {
+                    descend(elem.childNodes[0] as Element, depth + 1, result);
+                }
+                break;
+            case 3: // TEXT_NODE
+            case 4: // CDATA_SECTION_NODE
+            case 5: // ENTITY_REFERENCE_NODE
+            case 8: // COMMENT_NODE
+                // handle these cases as needed
+                break;
+        }
+    }
+
+    descend(elem, 0, result);
+    return result
 }
 
 function main() {
@@ -37,10 +51,10 @@ function main() {
         }
     }
 
-    const activationHandler = function (e) {
-        if (checkCombo(e, this.keycombo)) {
+    const activationHandler = (e: KeyboardEvent) => {
+        if (checkCombo(e, activationContext.keycombo)) {
             console.log("Active triggered!")
-            let onSelectPosition = function selectMacroPosition(e) {
+            const onSelectPosition = function selectMacroPosition(e: MouseEvent) {
                 makeMacro({
                     x: e.clientX,
                     y: e.clientY
@@ -57,40 +71,43 @@ function main() {
             }
             document.addEventListener("click", onSelectPosition)
         }
-    }.bind(activationContext)
+    }
 
     document.addEventListener("keydown", activationHandler)
 }
 
-function makeMacro(pos, keycombo) {
+function makeMacro(pos: Position, keycombo: KeyCombo) {
+    let macroMarker = document.createElement("div")
+
     let context = {
         keycombo: keycombo,
         coords: pos
     }
 
-    const onMacroTriggered = function (e) {
-        if (checkCombo(e, this.keycombo) && this.coords.x && this.coords.y) {
+    const onMacroTriggered = (e: KeyboardEvent) => {
+        if (checkCombo(e, context.keycombo) && context.coords.x && context.coords.y) {
             console.log("Macro triggered!")
             let evtObj = new MouseEvent('click', {
                 'view': window,
                 'bubbles': true,
                 'cancelable': true,
-                'screenX': this.coords.x,
-                'screenY': this.coords.y
+                'screenX': context.coords.x,
+                'screenY': context.coords.y
             })
 
-            let element = document.elementFromPoint(this.coords.x, this.coords.y)
+            let element = document.elementFromPoint(context.coords.x, context.coords.y)
+            if (!element) return
             element = findDeepest(element).deepestElem
             console.log(element)
 
             element.dispatchEvent(evtObj)
         }
-    }.bind(context)
+    }
 
     document.addEventListener("keydown", onMacroTriggered)
 }
 
-function checkCombo(e, keycombo) {
+function checkCombo(e: KeyboardEvent, keycombo: KeyCombo) {
     let keyMatch
     if (e.key && keycombo.key) {
         keyMatch = (e.key.toLowerCase() === keycombo.key.toLowerCase())

@@ -2,18 +2,39 @@
     --round-radius: 7.5px;
 }
 
-a, button, div, article, input, img, span.fc-button-today, textarea {
+/* === General Rounding === */
+
+a,
+button,
+div,
+article,
+input,
+img,
+span,
+textarea {
     border-radius: var(--round-radius);
 }
 
+/* === Navbar Rounding === */
+a[href="/home"] {
+    background-size: 140px;
+}
+
 .mod-style-stickyNav {
+    /* Navbar Container */
     position: sticky;
     top: 0;
     z-index: 999;
     padding: 10px;
 }
 
-.mod-style-navMenuButton {
+[class*="Header-header-button"],
+[href="/home"],
+div[role="menu"] {
+    /* Navbar buttons and menus */
+    margin-left: 5px;
+    margin-right: 5px;
+
     backdrop-filter: blur(2px);
     background-color: transparent !important;
     border: 1px solid #cfcfcf;
@@ -21,20 +42,34 @@ a, button, div, article, input, img, span.fc-button-today, textarea {
     box-sizing: border-box;
     box-shadow: 0 1px 5px 0 rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%);
 
-    transition: border ease-in-out 0.1s;
+    transition: background-color, border ease-in-out 0.1s;
 }
 
-.mod-style-navMenuButton:hover {
+[class*="Header-header-button"]:hover,
+[href="/home"]:hover {
+    /* Navbar buttons on hover */
     border: 3px solid #f0f0f0;
     backdrop-filter: blur(4px);
     box-shadow: 0 1px 5px 0 rgb(0 0 0 / 30%), 0 2px 2px 0 rgb(0 0 0 / 24%), 0 3px 1px -2px rgb(0 0 0 / 22%);
+}
+
+[class*="Header-header-button"]:active,
+[href="/home"] div[class*="util-hover-background-color"]:active {
+    background-color: #f0f0f0f3 !important;
+    border: 3px solid #f0f0f0;
+    backdrop-filter: blur(6px);
+}
+
+[class*="util-hover-background-color"]:hover {
+    background-color: rgba(0, 0, 0, 0.055) !important;
 }
 
 .action-links {
     border-radius: var(--round-radius);
 }
 
-.ui-selectmenu-menu { /* boy oh boy, someone got creative with the names */
+.ui-selectmenu-menu {
+    /* boy oh boy, someone got creative with the names */
     border-radius: var(--round-radius);
     margin-top: 40px !important;
 }
@@ -43,8 +78,17 @@ a, button, div, article, input, img, span.fc-button-today, textarea {
     transition: all 0.1s ease-in-out;
 }
 
+/* === Sharp Rounded Elements === */
+/* Sharp on all sides */
+span.grade-item-icon,
+span.event-icon,
+span.fc-button-agendaWeek {
+    border-radius: 0px;
+}
+
 /* Sharp on the right side */
-a[role="menuitem"], span.fc-corner-left:not(span.fc-button-today) {
+a[role="menuitem"],
+span.fc-corner-left:not(span.fc-button-today) {
     border-radius: var(--round-radius) 0px 0px var(--round-radius);
 }
 
@@ -54,14 +98,24 @@ span.fc-corner-right:not(span.fc-button-today) {
 }
 
 /* Sharp on the top side */
-.popups-tab {
-    border-radius: var(--round-radius) var(--round-radius) 0px 0px;
+.popups-body,
+.submit-buttons,
+[class*="Card-card-data"],
+form#s-comments-post-comment-form div#attachment-links,
+.page-title {
+    border-radius: 0px 0px var(--round-radius) var(--round-radius);
 }
 
 /* Sharp on the bottom side */
-.popups-title {
-    border-radius: 0px 0px var(--round-radius) var(--round-radius);
+.popups-tab,
+.popups-title,
+.mceLayout,
+.content-top-upper,
+div[class*="Card-card-image"] {
+    border-radius: var(--round-radius) var(--round-radius) 0px 0px;
 }
+
+/* === Misc === */
 
 /* #attachments-added-container {
     padding-top: 10px;
@@ -76,4 +130,11 @@ span.fc-corner-right:not(span.fc-button-today) {
 
 #course-profile-materials-folders a.sExtlink-processed {
     padding: 15px 0px;
+}
+
+/* Circular Profile Pictures on Main Menu */
+div.profile-picture img {
+    border-radius: 50%;
+    width: 50px !important;
+    height: 50px !important;
 }

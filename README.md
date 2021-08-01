@@ -15,11 +15,8 @@ Tetris! [Get](build/Tetris)
 ### "Building"
 
 Install packages with
-
 `npm install`
-
 then
-
 `node toBookmarklet.js <input file> <output file (optional)>`
 
 **Note: For typescript you have to run `npx tsc` first, then use the output file in `dist/` in the build command.**

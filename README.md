@@ -14,10 +14,12 @@ Tetris! [Get](build/Tetris)
 
 ### "Building"
 
-Minifying is handled by `babel-minify`, built from some parts of babel and a really nice package
+Install packages with
 
 `npm install`
 
-Then `node toBookmarklet.js <input file> <output file (optional)>`
+then
+
+`node toBookmarklet.js <input file> <output file (optional)>`
 
 **Note: For typescript you have to run `npx tsc` first, then use the output file in `dist/` in the build command.**
